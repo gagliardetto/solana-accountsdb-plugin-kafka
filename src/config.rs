@@ -49,6 +49,19 @@ pub struct Config {
     /// Publish all accounts on startup.
     #[serde(default)]
     pub publish_all_accounts: bool,
+    /// Allowlist of programs to publish.
+    /// If empty, all accounts are published.
+    /// If not empty, only accounts owned by programs in this list are published.
+    #[serde(default)]
+    pub program_allowlist: Vec<String>,
+    /// Allowlist from http url.
+    /// If empty, all accounts are published.
+    /// If not empty, only accounts owned by programs in this list are published.
+    #[serde(default)]
+    pub program_allowlist_url: String,
+    /// Update iterval for allowlist from http url.
+    #[serde(default)]
+    pub program_allowlist_update_interval_sec: u64,
 }
 
 impl Default for Config {
@@ -61,6 +74,9 @@ impl Default for Config {
             transaction_topic: "".to_owned(),
             program_ignores: Vec::new(),
             publish_all_accounts: false,
+            program_allowlist: Vec::new(),
+            program_allowlist_url: "".to_owned(),
+            program_allowlist_update_interval_sec: 60,
         }
     }
 }

@@ -45,6 +45,11 @@ Config is specified via the plugin's JSON config file.
   "program_ignores": [
     "Sysvar1111111111111111111111111111111111111",
     "Vote111111111111111111111111111111111111111"
+  ],
+  "program_allowlist_http": "https://example.com/program_allowlist.txt",
+  "program_allowlist_update_interval_sec": 5,
+  "program_allowlist": [
+    "11111111111111111111111111111111"
   ]
 }
 ```
@@ -59,6 +64,9 @@ Config is specified via the plugin's JSON config file.
 - `slot_status_topic`: Topic name of slot status update. Omit to disable.
 - `publish_all_accounts`: Publish all accounts on startup. Omit to disable.
 - `program_ignores`: Solana program IDs for which to ignore updates for owned accounts.
+- `program_allowlist`: Solana program IDs for which to publish updates for owned accounts.
+- `program_allowlist_http`: HTTP URL to fetch the program allowlist from. The file must contain one Solana program pubkey per line.
+- `program_allowlist_update_interval_sec`: Interval in seconds to fetch the program allowlist from the HTTP URL.
 
 ## Buffering
 

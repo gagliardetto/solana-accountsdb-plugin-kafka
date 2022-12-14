@@ -94,6 +94,10 @@ impl GeyserPlugin for KafkaPlugin {
             return Ok(());
         }
 
+        self.unwrap_filter()
+            .get_allowlist()
+            .update_from_http_if_needed_async();
+
         let event = UpdateAccountEvent {
             slot,
             pubkey: info.pubkey.to_vec(),
