@@ -133,7 +133,7 @@ impl Allowlist {
         }
     }
 
-    fn get_from_http(url: &str) -> PluginResult<HashSet<[u8; 32]>> {
+    fn fetch_remote_allowlist(url: &str) -> PluginResult<HashSet<[u8; 32]>> {
         let mut program_allowlist = HashSet::new();
 
         match ureq::get(url).call() {
@@ -170,7 +170,7 @@ impl Allowlist {
         let http_last_updated = self.http_last_updated.clone();
         let url = self.http_url.clone();
         std::thread::spawn(move || {
-            let program_allowlist = Self::get_from_http(&url).unwrap();
+            let program_allowlist = Self::fetch_remote_allowlist(&url).unwrap();
 
             let mut list = list.lock().unwrap();
             *list = program_allowlist;
@@ -196,7 +196,7 @@ impl Allowlist {
         if self.http_url.is_empty() {
             return Ok(());
         }
-        let program_allowlist = Self::get_from_http(&self.http_url)?;
+        let program_allowlist = Self::fetch_remote_allowlist(&self.http_url)?;
 
         let mut list = self.list.lock().unwrap();
         *list = program_allowlist;
@@ -211,7 +211,7 @@ impl Allowlist {
         if interval < std::time::Duration::from_secs(1) {
             interval = std::time::Duration::from_secs(1);
         }
-        let program_allowlist = Self::get_from_http(url)?;
+        let program_allowlist = Self::fetch_remote_allowlist(url)?;
         Ok(Self {
             list: Arc::new(Mutex::new(program_allowlist)),
             // last updated: now
