@@ -141,8 +141,11 @@ impl Allowlist {
     fn push_vec(&mut self, program_allowlist: Vec<String>) {
         let mut list = self.list.lock().unwrap();
         for pubkey in program_allowlist {
-            let pubkey = Pubkey::from_str(&pubkey).unwrap();
-            list.insert(pubkey.to_bytes());
+            let pubkey = Pubkey::from_str(&pubkey);
+            if pubkey.is_err() {
+                continue;
+            }
+            list.insert(pubkey.unwrap().to_bytes());
         }
     }
 
@@ -162,11 +165,22 @@ impl Allowlist {
                     )));
                 }
                 /* the server returned a 200 OK response */
-                let body = response.into_string().unwrap();
-                let lines = body.lines();
-                for line in lines {
-                    let pubkey = Pubkey::from_str(line).unwrap();
-                    program_allowlist.insert(pubkey.to_bytes());
+                let body = response.into_string();
+                if body.is_err() {
+                    return Err(PluginError::Custom(Box::new(
+                        simple_error::SimpleError::new(format!(
+                            "Failed to fetch allowlist from remote server: {}",
+                            body.err().unwrap()
+                        )),
+                    )));
+                }
+                let lines = body.unwrap();
+                for line in lines.lines() {
+                    let pubkey = Pubkey::from_str(line);
+                    if pubkey.is_err() {
+                        continue;
+                    }
+                    program_allowlist.insert(pubkey.unwrap().to_bytes());
                 }
             }
             Err(ureq::Error::Status(code, _response)) => {
