@@ -46,7 +46,7 @@ Config is specified via the plugin's JSON config file.
     "Sysvar1111111111111111111111111111111111111",
     "Vote111111111111111111111111111111111111111"
   ],
-  "program_allowlist_http": "https://example.com/program_allowlist.txt",
+  "program_allowlist_url": "https://example.com/program_allowlist.txt",
   "program_allowlist_expiry_sec": 5,
   "program_allowlist": [
     "11111111111111111111111111111111"
@@ -65,7 +65,7 @@ Config is specified via the plugin's JSON config file.
 - `publish_all_accounts`: Publish all accounts on startup. Omit to disable.
 - `program_ignores`: Solana program IDs for which to ignore updates for owned accounts.
 - `program_allowlist`: Solana program IDs for which to publish updates for owned accounts.
-- `program_allowlist_http`: HTTP URL to fetch the program allowlist from. The file must be json, and with the following schema:
+- `program_allowlist_url`: HTTP URL to fetch the program allowlist from. The file must be json, and with the following schema:
   ```json
   {
     "program_allowlist": [
