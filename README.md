@@ -47,7 +47,7 @@ Config is specified via the plugin's JSON config file.
     "Vote111111111111111111111111111111111111111"
   ],
   "program_allowlist_http": "https://example.com/program_allowlist.txt",
-  "program_allowlist_update_interval_sec": 5,
+  "program_allowlist_expiry_sec": 5,
   "program_allowlist": [
     "11111111111111111111111111111111"
   ]
@@ -74,7 +74,7 @@ Config is specified via the plugin's JSON config file.
     ]
   }
   ```
-- `program_allowlist_update_interval_sec`: Interval in seconds to fetch the program allowlist from the HTTP URL.
+- `program_allowlist_expiry_sec`: Expiry time for the program allowlist cache before fetching it again from the HTTP URL.
 
 ## Buffering
 

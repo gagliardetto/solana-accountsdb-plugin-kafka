@@ -61,7 +61,7 @@ pub struct Config {
     pub program_allowlist_url: String,
     /// Update iterval for allowlist from http url.
     #[serde(default)]
-    pub program_allowlist_update_interval_sec: u64,
+    pub program_allowlist_expiry_sec: u64,
 }
 
 impl Default for Config {
@@ -76,7 +76,7 @@ impl Default for Config {
             publish_all_accounts: false,
             program_allowlist: Vec::new(),
             program_allowlist_url: "".to_owned(),
-            program_allowlist_update_interval_sec: 60,
+            program_allowlist_expiry_sec: 60,
         }
     }
 }

@@ -108,7 +108,7 @@ impl Allowlist {
         if !config.program_allowlist_url.is_empty() {
             let mut out = Self::new_from_http(
                 &config.program_allowlist_url.clone(),
-                std::time::Duration::from_secs(config.program_allowlist_update_interval_sec),
+                std::time::Duration::from_secs(config.program_allowlist_expiry_sec),
             )
             .unwrap();
 
@@ -393,7 +393,7 @@ mod tests {
 
         let config = Config {
             program_allowlist_url: [mockito::server_url(), "/allowlist.txt".to_owned()].join(""),
-            program_allowlist_update_interval_sec: 3,
+            program_allowlist_expiry_sec: 3,
             program_allowlist: vec!["WormT3McKhFJ2RkiGpdw9GKvNCrB2aB54gb2uV9MfQC".to_owned()],
             ..Config::default()
         };
