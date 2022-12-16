@@ -91,6 +91,13 @@ impl Clone for Allowlist {
     }
 }
 
+use serde::Deserialize;
+
+#[derive(Deserialize, Debug)]
+struct RemoteAllowlist {
+    program_allowlist: Vec<String>,
+}
+
 // new() is a constructor for Allowlist
 impl Allowlist {
     pub fn len(&self) -> usize {
@@ -174,9 +181,19 @@ impl Allowlist {
                         )),
                     )));
                 }
-                let lines = body.unwrap();
-                for line in lines.lines() {
-                    let pubkey = Pubkey::from_str(line);
+                // parse the response body as json:
+                let raw = serde_json::from_str(&body.unwrap());
+                if raw.is_err() {
+                    return Err(PluginError::Custom(Box::new(
+                        simple_error::SimpleError::new(format!(
+                            "Failed to fetch allowlist from remote server: {}",
+                            raw.err().unwrap()
+                        )),
+                    )));
+                }
+                let list: RemoteAllowlist = raw.unwrap();
+                for pubkey in list.program_allowlist {
+                    let pubkey = Pubkey::from_str(&pubkey);
                     if pubkey.is_err() {
                         continue;
                     }
@@ -371,7 +388,7 @@ mod tests {
         let _m = mockito::mock("GET", "/allowlist.txt")
             .with_status(200)
             .with_header("content-type", "text/plain")
-            .with_body("Sysvar1111111111111111111111111111111111111\nVote111111111111111111111111111111111111111")
+            .with_body("{\"program_allowlist\":[\"Sysvar1111111111111111111111111111111111111\",\"Vote111111111111111111111111111111111111111\"]}")
             .create();
 
         let config = Config {
@@ -411,7 +428,9 @@ mod tests {
             let _u = mockito::mock("GET", "/allowlist.txt")
                 .with_status(200)
                 .with_header("content-type", "text/plain")
-                .with_body("9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin")
+                .with_body(
+                    "{\"program_allowlist\":[\"9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin\"]}",
+                )
                 .create();
             allowlist.update_from_http().unwrap();
             assert_eq!(allowlist.len(), 1);
@@ -426,7 +445,7 @@ mod tests {
             let _u = mockito::mock("GET", "/allowlist.txt")
                 .with_status(200)
                 .with_header("content-type", "text/plain")
-                .with_body("")
+                .with_body("{\"program_allowlist\":[]}")
                 .create();
             let last_updated = allowlist.get_last_updated();
             println!("last_updated: {:?}", last_updated);
@@ -446,7 +465,7 @@ mod tests {
             let _u = mockito::mock("GET", "/allowlist.txt")
                 .with_status(200)
                 .with_header("content-type", "text/plain")
-                .with_body("Sysvar1111111111111111111111111111111111111\nVote111111111111111111111111111111111111111")
+                .with_body("{\"program_allowlist\":[\"Sysvar1111111111111111111111111111111111111\",\"Vote111111111111111111111111111111111111111\"]}")
                 .create();
 
             let last_updated = allowlist.get_last_updated();
