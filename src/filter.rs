@@ -95,6 +95,7 @@ use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
 struct RemoteAllowlist {
+    #[serde(rename = "programAllowlist")]
     program_allowlist: Vec<String>,
 }
 
@@ -388,7 +389,7 @@ mod tests {
         let _m = mockito::mock("GET", "/allowlist.txt")
             .with_status(200)
             .with_header("content-type", "text/plain")
-            .with_body("{\"program_allowlist\":[\"Sysvar1111111111111111111111111111111111111\",\"Vote111111111111111111111111111111111111111\"]}")
+            .with_body("{\"programAllowlist\":[\"Sysvar1111111111111111111111111111111111111\",\"Vote111111111111111111111111111111111111111\"]}")
             .create();
 
         let config = Config {
@@ -429,7 +430,7 @@ mod tests {
                 .with_status(200)
                 .with_header("content-type", "text/plain")
                 .with_body(
-                    "{\"program_allowlist\":[\"9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin\"]}",
+                    "{\"programAllowlist\":[\"9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin\"]}",
                 )
                 .create();
             allowlist.update_from_http().unwrap();
@@ -445,7 +446,7 @@ mod tests {
             let _u = mockito::mock("GET", "/allowlist.txt")
                 .with_status(200)
                 .with_header("content-type", "text/plain")
-                .with_body("{\"program_allowlist\":[]}")
+                .with_body("{\"programAllowlist\":[]}")
                 .create();
             let last_updated = allowlist.get_last_updated();
             println!("last_updated: {:?}", last_updated);
@@ -465,7 +466,7 @@ mod tests {
             let _u = mockito::mock("GET", "/allowlist.txt")
                 .with_status(200)
                 .with_header("content-type", "text/plain")
-                .with_body("{\"program_allowlist\":[\"Sysvar1111111111111111111111111111111111111\",\"Vote111111111111111111111111111111111111111\"]}")
+                .with_body("{\"programAllowlist\":[\"Sysvar1111111111111111111111111111111111111\",\"Vote111111111111111111111111111111111111111\"]}")
                 .create();
 
             let last_updated = allowlist.get_last_updated();

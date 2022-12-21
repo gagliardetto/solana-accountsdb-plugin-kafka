@@ -68,7 +68,7 @@ Config is specified via the plugin's JSON config file.
 - `program_allowlist_url`: HTTP URL to fetch the program allowlist from. The file must be json, and with the following schema:
   ```json
   {
-    "program_allowlist": [
+    "programAllowlist": [
       "11111111111111111111111111111111",
       "22222222222222222222222222222222"
     ]
