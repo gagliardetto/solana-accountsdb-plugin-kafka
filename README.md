@@ -45,6 +45,11 @@ Config is specified via the plugin's JSON config file.
   "program_ignores": [
     "Sysvar1111111111111111111111111111111111111",
     "Vote111111111111111111111111111111111111111"
+  ],
+  "program_allowlist_url": "https://example.com/program_allowlist.txt",
+  "program_allowlist_expiry_sec": 5,
+  "program_allowlist": [
+    "11111111111111111111111111111111"
   ]
 }
 ```
@@ -59,6 +64,17 @@ Config is specified via the plugin's JSON config file.
 - `slot_status_topic`: Topic name of slot status update. Omit to disable.
 - `publish_all_accounts`: Publish all accounts on startup. Omit to disable.
 - `program_ignores`: Solana program IDs for which to ignore updates for owned accounts.
+- `program_allowlist`: Hardcoded program allowlist. Omit to disable. This is useful for testing.
+- `program_allowlist_url`: HTTP URL to fetch the program allowlist from. The file must be json, and with the following schema:
+  ```json
+  {
+    "programAllowlist": [
+      "11111111111111111111111111111111",
+      "22222222222222222222222222222222"
+    ]
+  }
+  ```
+- `program_allowlist_expiry_sec`: Expiry time for the program allowlist cache before fetching it again from the HTTP URL.
 
 ## Buffering
 
