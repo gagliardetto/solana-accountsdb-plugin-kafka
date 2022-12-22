@@ -150,9 +150,20 @@ impl Allowlist {
             if out.is_err() {
                 let err = out.as_ref().err().unwrap();
                 error!(
-                    "Failed to fetch allowlist from url {}: {:?}",
+                    "Failed to fetch allowlist from url at creation {}: {:?}",
                     config.program_allowlist_url, err
                 );
+
+                return Ok(Self {
+                    list: Arc::new(Mutex::new(HashSet::new())),
+                    // last updated: now
+                    http_last_updated: Arc::new(Mutex::new(std::time::Instant::now())),
+                    http_url: config.program_allowlist_url.to_string(),
+                    http_update_interval: std::time::Duration::from_secs(
+                        config.program_allowlist_expiry_sec,
+                    ),
+                    http_updater_one: Arc::new(Mutex::new(())),
+                });
             }
 
             let mut unwrap = out.unwrap();
