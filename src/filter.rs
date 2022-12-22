@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use log::{debug, error, info, warn};
 use std::sync::{Arc, Mutex};
 use {
     crate::*,
@@ -37,6 +38,35 @@ impl Clone for Filter {
 
 impl Filter {
     pub fn new(config: &Config) -> Self {
+        info!("Creating filter");
+
+        if config.program_allowlist.len() > 0 {
+            info!(
+                "Using program allowlist, with {} entries",
+                config.program_allowlist.len()
+            );
+        } else {
+            info!("program_allowlist is empty");
+        }
+
+        if !config.program_allowlist_url.is_empty() {
+            info!(
+                "Using program allowlist from url: {}",
+                config.program_allowlist_url
+            );
+        } else {
+            info!("program_allowlist_url is empty");
+        }
+
+        // program_allowlist_expiry_sec
+        if config.program_allowlist_expiry_sec > 0 {
+            info!(
+                "program_allowlist_expiry_sec is set to {}",
+                config.program_allowlist_expiry_sec
+            );
+        } else {
+            info!("program_allowlist_expiry_sec is not set");
+        }
         Self {
             program_ignores: config
                 .program_ignores
@@ -106,21 +136,43 @@ impl Allowlist {
         list.len()
     }
     pub fn new_from_config(config: &Config) -> PluginResult<Self> {
+        info!("Creating allowlist");
+
         if !config.program_allowlist_url.is_empty() {
-            let mut out = Self::new_from_http(
+            info!(
+                "Using program allowlist from url: {}",
+                config.program_allowlist_url,
+            );
+            let out = Self::new_from_http(
                 &config.program_allowlist_url.clone(),
                 std::time::Duration::from_secs(config.program_allowlist_expiry_sec),
-            )
-            .unwrap();
-
-            if !config.program_allowlist.is_empty() {
-                out.push_vec(config.program_allowlist.clone());
+            );
+            if out.is_err() {
+                error!(
+                    "Failed to fetch allowlist from url: {}",
+                    config.program_allowlist_url
+                );
             }
 
-            Ok(out)
+            let mut unwrap = out.unwrap();
+
+            if !config.program_allowlist.is_empty() {
+                info!(
+                    "Adding {} entries from program_allowlist to allowlist",
+                    config.program_allowlist.len()
+                );
+                unwrap.push_vec(config.program_allowlist.clone());
+            }
+
+            Ok(unwrap)
         } else if !config.program_allowlist.is_empty() {
+            info!(
+                "Using program allowlist, with {} entries",
+                config.program_allowlist.len()
+            );
             Self::new_from_vec(config.program_allowlist.clone())
         } else {
+            info!("program_allowlist is empty");
             Ok(Self {
                 list: Arc::new(Mutex::new(HashSet::new())),
                 http_last_updated: Arc::new(Mutex::new(std::time::Instant::now())),
@@ -148,9 +200,14 @@ impl Allowlist {
 
     fn push_vec(&mut self, program_allowlist: Vec<String>) {
         let mut list = self.list.lock().unwrap();
-        for pubkey in program_allowlist {
-            let pubkey = Pubkey::from_str(&pubkey);
+        for pubkey_string in program_allowlist {
+            let pubkey = Pubkey::from_str(&pubkey_string);
             if pubkey.is_err() {
+                // warn with escaped pubkey string
+                warn!(
+                    "Failed to parse pubkey from program_allowlist: {}",
+                    pubkey_string.escape_default()
+                );
                 continue;
             }
             list.insert(pubkey.unwrap().to_bytes());
@@ -266,8 +323,14 @@ impl Allowlist {
         let http_last_updated = self.http_last_updated.clone();
         let url = self.http_url.clone();
         std::thread::spawn(move || {
+            info!("Updating program allowlist from remote server: {}", url);
             let program_allowlist = Self::fetch_remote_allowlist(&url);
             if program_allowlist.is_err() {
+                error!(
+                    "Failed to update program allowlist from remote server {}: {}",
+                    url,
+                    program_allowlist.unwrap_err(),
+                );
                 return;
             }
 
@@ -290,6 +353,10 @@ impl Allowlist {
 
     pub fn update_from_http_if_needed_async(&mut self) {
         if self.is_remote_allowlist_expired() {
+            info!(
+                "List expired; updating program allowlist from remote server: {}",
+                self.http_url
+            );
             self.update_from_http_non_blocking();
         }
     }
