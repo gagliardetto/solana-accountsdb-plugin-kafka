@@ -148,9 +148,10 @@ impl Allowlist {
                 std::time::Duration::from_secs(config.program_allowlist_expiry_sec),
             );
             if out.is_err() {
+                let err = out.as_ref().err().unwrap();
                 error!(
-                    "Failed to fetch allowlist from url: {}",
-                    config.program_allowlist_url
+                    "Failed to fetch allowlist from url {}: {:?}",
+                    config.program_allowlist_url, err
                 );
             }
 
